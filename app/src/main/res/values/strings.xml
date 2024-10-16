@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">DicodingEvent</string>
+    <string name="title_activity_bottom_navigatioin_main">BottomNavigatioinMainActivity</string>
+    <string name="upcoming">Upcoming</string>
+    <string name="finished">Finished</string>
+    <string name="name">Nama Acara</string>
+    <string name="owner">Penyelenggara Acara</string>
+    <string name="begin_time">Waktu Acara</string>
+    <string name="quota">Sisa Kuota</string>
+    <string name="description">Deskripsi Acara</string>
+    <string name="register">Register</string>
+    <string name="searchbar_hint">Cari event</string>
+    <string name="upcoming_events">Upcoming Events</string>
+    <string name="finished_events">Finished Events</string>
+    <string name="home">Home</string>
+    <string name="media_cover">Media Cover</string>
+    <string name="summary">Ringkasan Acara</string>
+</resources>
