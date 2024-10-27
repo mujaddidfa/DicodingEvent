@@ -35,6 +35,24 @@ class EventAdapter : ListAdapter<ListEventsItem, EventAdapter.MyViewHolder>(DIFF
         }
     }
 
+    companion object {
+        val DIFF_CALLBACK = object : DiffUtil.ItemCallback<ListEventsItem>() {
+            override fun areItemsTheSame(
+                oldItem: ListEventsItem,
+                newItem: ListEventsItem
+            ): Boolean {
+                return oldItem == newItem
+            }
+
+            override fun areContentsTheSame(
+                oldItem: ListEventsItem,
+                newItem: ListEventsItem
+            ): Boolean {
+                return oldItem == newItem
+            }
+        }
+    }
+
     class MyViewHolder(private val binding: ItemEventBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(event: ListEventsItem) {
             binding.progressBar.visibility = View.VISIBLE
@@ -64,24 +82,6 @@ class EventAdapter : ListAdapter<ListEventsItem, EventAdapter.MyViewHolder>(DIFF
                 })
                 .into(binding.imgItemPhoto)
             binding.tvItemDescription.text = "${event.name}"
-        }
-    }
-
-    companion object {
-        val DIFF_CALLBACK = object : DiffUtil.ItemCallback<ListEventsItem>() {
-            override fun areItemsTheSame(
-                oldItem: ListEventsItem,
-                newItem: ListEventsItem
-            ): Boolean {
-                return oldItem == newItem
-            }
-
-            override fun areContentsTheSame(
-                oldItem: ListEventsItem,
-                newItem: ListEventsItem
-            ): Boolean {
-                return oldItem == newItem
-            }
         }
     }
 

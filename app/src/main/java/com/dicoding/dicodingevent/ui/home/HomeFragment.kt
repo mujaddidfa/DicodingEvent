@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dicoding.dicodingevent.data.response.ListEventsItem
@@ -16,7 +17,7 @@ import com.dicoding.dicodingevent.ui.EventAdapter
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
-    private val binding get() = _binding!!
+    private val binding get() = _binding ?: throw IllegalStateException("View binding is only valid between onCreateView and onDestroyView")
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -88,19 +89,9 @@ class HomeFragment : Fragment() {
         })
     }
 
-    private fun showLoadingUpcomingEvents(isLoading: Boolean) {
-        if (isLoading)
-            binding.progressBarUpcomingEvents.visibility = View.VISIBLE
-        else
-            binding.progressBarUpcomingEvents.visibility = View.GONE
-    }
+    private fun showLoadingUpcomingEvents(isLoading: Boolean) = binding.progressBarUpcomingEvents.isVisible == isLoading
 
-    private fun showLoadingFinishedEvents(isLoading: Boolean) {
-        if (isLoading)
-            binding.progressBarFinishedEvents.visibility = View.VISIBLE
-        else
-            binding.progressBarFinishedEvents.visibility = View.GONE
-    }
+    private fun showLoadingFinishedEvents(isLoading: Boolean) = binding.progressBarFinishedEvents.isVisible == isLoading
 
     private fun showSelectedEvent(event: ListEventsItem) {
         val id = event.id

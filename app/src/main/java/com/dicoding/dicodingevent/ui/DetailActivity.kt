@@ -4,11 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
+import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
 import com.dicoding.dicodingevent.data.response.Event
 import com.dicoding.dicodingevent.databinding.ActivityDetailBinding
@@ -16,10 +16,6 @@ import com.dicoding.dicodingevent.databinding.ActivityDetailBinding
 class DetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDetailBinding
     private val detailViewModel: DetailViewModel by viewModels()
-
-    companion object {
-        const val EXTRA_ID = "extra_id"
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,31 +47,30 @@ class DetailActivity : AppCompatActivity() {
         Glide.with(this@DetailActivity)
             .load(event?.mediaCover)
             .into(binding.imgMediaCover)
-        binding.tvName.text = event?.name
-        binding.tvSummary.text = event?.summary
-        binding.tvOwnerName.text = "Penyelenggara: ${event?.ownerName}"
-        binding.tvQuota.text = "Sisa Kuota ${event?.quota?.minus(event.registrants!!)}"
-        binding.tvBeginTime.text = event?.beginTime
-        binding.tvDescription.text = HtmlCompat.fromHtml(
-            event?.description.toString(),
-            HtmlCompat.FROM_HTML_MODE_LEGACY
-        )
-
-        binding.btnRegister.setOnClickListener {
-            val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(event?.link))
-            startActivity(webIntent)
+        binding.apply {
+            tvName.text = event?.name
+            tvSummary.text = event?.summary
+            tvOwnerName.text = "Penyelenggara: ${event?.ownerName}"
+            tvQuota.text = "Sisa Kuota ${event?.quota?.minus(event.registrants!!)}"
+            tvBeginTime.text = event?.beginTime
+            tvDescription.text = HtmlCompat.fromHtml(
+                event?.description.toString(),
+                HtmlCompat.FROM_HTML_MODE_LEGACY
+            )
+            btnRegister.setOnClickListener {
+                val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(event?.link))
+                startActivity(webIntent)
+            }
         }
     }
 
-    private fun showLoading(isLoading: Boolean) {
-        if (isLoading) {
-            binding.progressBar.visibility = View.VISIBLE
-        } else {
-            binding.progressBar.visibility = View.GONE
-        }
-    }
+    private fun showLoading(isLoading: Boolean) = binding.progressBar.isVisible == isLoading
 
     private fun showError(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    }
+
+    companion object {
+        const val EXTRA_ID = "extra_id"
     }
 }
