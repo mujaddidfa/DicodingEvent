@@ -16,7 +16,7 @@ import com.dicoding.dicodingevent.data.remote.response.ListEventsItem
 import com.dicoding.dicodingevent.data.remote.retrofit.ApiConfig
 import com.dicoding.dicodingevent.data.repository.EventRepository
 import com.dicoding.dicodingevent.databinding.FragmentFinishedBinding
-import com.dicoding.dicodingevent.ui.DetailActivity
+import com.dicoding.dicodingevent.ui.detail.DetailActivity
 import com.dicoding.dicodingevent.ui.EventAdapter
 import com.dicoding.dicodingevent.ui.EventViewModel
 import com.dicoding.dicodingevent.ui.ViewModelFactory

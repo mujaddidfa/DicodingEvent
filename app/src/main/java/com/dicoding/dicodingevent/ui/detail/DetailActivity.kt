@@ -1,4 +1,4 @@
-package com.dicoding.dicodingevent.ui
+package com.dicoding.dicodingevent.ui.detail
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -9,11 +9,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
 import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
+import com.dicoding.dicodingevent.R
 import com.dicoding.dicodingevent.data.local.entity.EventEntity
 import com.dicoding.dicodingevent.data.local.room.EventDatabase
 import com.dicoding.dicodingevent.data.remote.retrofit.ApiConfig
 import com.dicoding.dicodingevent.data.repository.EventRepository
 import com.dicoding.dicodingevent.databinding.ActivityDetailBinding
+import com.dicoding.dicodingevent.ui.ViewModelFactory
 import com.dicoding.dicodingevent.utils.AppExecutors
 
 class DetailActivity : AppCompatActivity() {
@@ -44,6 +46,14 @@ class DetailActivity : AppCompatActivity() {
         detailViewModel.isLoading.observe(this) { isLoading ->
             showLoading(isLoading)
         }
+
+        binding.fabFavorite.setOnClickListener {
+            val event = detailViewModel.eventDetail.value
+            if (event != null) {
+                val newState = !event.isFavorite
+                detailViewModel.setFavoriteEvent(event.id, newState)
+            }
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -65,7 +75,11 @@ class DetailActivity : AppCompatActivity() {
                 val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(event?.link))
                 startActivity(webIntent)
             }
-
+            if (event?.isFavorite == true) {
+                fabFavorite.setImageResource(R.drawable.baseline_favorite_24)
+            } else {
+                fabFavorite.setImageResource(R.drawable.baseline_favorite_border_24)
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-package com.dicoding.dicodingevent.ui.home
+package com.dicoding.dicodingevent.ui.favorite
 
 import android.content.Intent
 import android.os.Bundle
@@ -10,21 +10,22 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.dicoding.dicodingevent.R
 import com.dicoding.dicodingevent.data.Result
 import com.dicoding.dicodingevent.data.local.room.EventDatabase
 import com.dicoding.dicodingevent.data.remote.response.ListEventsItem
 import com.dicoding.dicodingevent.data.remote.retrofit.ApiConfig
 import com.dicoding.dicodingevent.data.repository.EventRepository
-import com.dicoding.dicodingevent.databinding.FragmentHomeBinding
-import com.dicoding.dicodingevent.ui.detail.DetailActivity
+import com.dicoding.dicodingevent.databinding.FragmentFavoriteBinding
 import com.dicoding.dicodingevent.ui.EventAdapter
 import com.dicoding.dicodingevent.ui.EventViewModel
 import com.dicoding.dicodingevent.ui.ViewModelFactory
+import com.dicoding.dicodingevent.ui.detail.DetailActivity
 import com.dicoding.dicodingevent.utils.AppExecutors
 
-class HomeFragment : Fragment() {
+class FavoriteFragment : Fragment() {
 
-    private var _binding: FragmentHomeBinding? = null
+    private var _binding: FragmentFavoriteBinding? = null
     private val binding get() = _binding ?: throw IllegalStateException("View binding is only valid between onCreateView and onDestroyView")
 
     private val eventViewModel: EventViewModel by viewModels {
@@ -38,24 +39,21 @@ class HomeFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        _binding = FragmentFavoriteBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
         super.onCreate(savedInstanceState)
 
-        val upcomingEventslayoutManager = LinearLayoutManager(requireActivity(), LinearLayoutManager.HORIZONTAL, false)
-        binding.rvUpcomingEvents.layoutManager = upcomingEventslayoutManager
+        val layoutManager = LinearLayoutManager(requireActivity())
+        binding.rvEvent.layoutManager = layoutManager
 
-        val finishedEventsLayoutManager = LinearLayoutManager(requireActivity())
-        binding.rvFinishedEvents.layoutManager = finishedEventsLayoutManager
-
-        eventViewModel.getUpcomingEvents().observe(viewLifecycleOwner) { result ->
+        eventViewModel.getFavoriteEvents().observe(viewLifecycleOwner) { result ->
             when (result) {
-                is Result.Loading -> showLoadingUpcomingEvents(true)
+                is Result.Loading -> showLoading(true)
                 is Result.Success -> {
-                    showLoadingUpcomingEvents(false)
+                    showLoading(false)
                     val eventList = result.data.map { eventEntity ->
                         ListEventsItem(
                             id = eventEntity.id,
@@ -74,42 +72,10 @@ class HomeFragment : Fragment() {
                             category = eventEntity.category
                         )
                     }
-                    setUpcomingEventData(eventList)
+                    setEventData(eventList)
                 }
                 is Result.Error -> {
-                    showLoadingUpcomingEvents(false)
-                    showError(result.error)
-                }
-            }
-        }
-
-        eventViewModel.getFinishedEvents().observe(viewLifecycleOwner) { result ->
-            when (result) {
-                is Result.Loading -> showLoadingFinishedEvents(true)
-                is Result.Success -> {
-                    showLoadingFinishedEvents(false)
-                    val eventList = result.data.map { eventEntity ->
-                        ListEventsItem(
-                            id = eventEntity.id,
-                            name = eventEntity.name,
-                            summary = eventEntity.summary,
-                            mediaCover = eventEntity.mediaCover,
-                            registrants = eventEntity.registrants,
-                            imageLogo = eventEntity.imageLogo,
-                            link = eventEntity.link,
-                            description = eventEntity.description,
-                            ownerName = eventEntity.ownerName,
-                            cityName = eventEntity.cityName,
-                            quota = eventEntity.quota,
-                            beginTime = eventEntity.beginTime,
-                            endTime = eventEntity.endTime,
-                            category = eventEntity.category
-                        )
-                    }
-                    setFinishedEventData(eventList)
-                }
-                is Result.Error -> {
-                    showLoadingFinishedEvents(false)
+                    showLoading(false)
                     showError(result.error)
                 }
             }
@@ -123,10 +89,10 @@ class HomeFragment : Fragment() {
         _binding = null
     }
 
-    private fun setUpcomingEventData(event: List<ListEventsItem?>?) {
+    private fun setEventData(event: List<ListEventsItem?>?) {
         val adapter = EventAdapter()
-        adapter.submitList(event?.take(5))
-        binding.rvUpcomingEvents.adapter = adapter
+        adapter.submitList(event)
+        binding.rvEvent.adapter = adapter
 
         adapter.setOnItemClickCallback(object : EventAdapter.OnItemClickCallback {
             override fun onItemClicked(event: ListEventsItem) {
@@ -135,21 +101,7 @@ class HomeFragment : Fragment() {
         })
     }
 
-    private fun setFinishedEventData(event: List<ListEventsItem?>?) {
-        val adapter = EventAdapter()
-        adapter.submitList(event?.take(5))
-        binding.rvFinishedEvents.adapter = adapter
-
-        adapter.setOnItemClickCallback(object : EventAdapter.OnItemClickCallback {
-            override fun onItemClicked(event: ListEventsItem) {
-                showSelectedEvent(event)
-            }
-        })
-    }
-
-    private fun showLoadingUpcomingEvents(isLoading: Boolean) = binding.progressBarUpcomingEvents.isVisible == isLoading
-
-    private fun showLoadingFinishedEvents(isLoading: Boolean) = binding.progressBarFinishedEvents.isVisible == isLoading
+    private fun showLoading(isLoading: Boolean) = binding.progressBar.isVisible == isLoading
 
     private fun showSelectedEvent(event: ListEventsItem) {
         val id = event.id

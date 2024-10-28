@@ -23,4 +23,10 @@
         android:label="@string/finished"
         tools:layout="@layout/fragment_upcoming" />
 
+    <fragment
+        android:id="@+id/navigation_favorite"
+        android:name="com.dicoding.dicodingevent.ui.favorite.FavoriteFragment"
+        android:label="@string/favorite"
+        tools:layout="@layout/fragment_favorite" />
+
 </navigation>

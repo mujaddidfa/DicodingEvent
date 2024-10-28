@@ -1,4 +1,4 @@
-package com.dicoding.dicodingevent.ui
+package com.dicoding.dicodingevent.ui.detail
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -19,5 +19,9 @@ class DetailViewModel(private val eventRepository: EventRepository) : ViewModel(
             _isLoading.value = false
             _eventDetail.value = it
         }
+    }
+
+    fun setFavoriteEvent(eventId: Int, isFavorite: Boolean) {
+        eventRepository.setFavoriteEvent(eventId, isFavorite)
     }
 }
