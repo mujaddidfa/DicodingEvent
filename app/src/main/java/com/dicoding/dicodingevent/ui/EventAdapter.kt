@@ -12,7 +12,7 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import com.dicoding.dicodingevent.data.response.ListEventsItem
+import com.dicoding.dicodingevent.data.remote.response.ListEventsItem
 import com.dicoding.dicodingevent.databinding.ItemEventBinding
 
 class EventAdapter : ListAdapter<ListEventsItem, EventAdapter.MyViewHolder>(DIFF_CALLBACK) {
@@ -81,7 +81,7 @@ class EventAdapter : ListAdapter<ListEventsItem, EventAdapter.MyViewHolder>(DIFF
                     }
                 })
                 .into(binding.imgItemPhoto)
-            binding.tvItemDescription.text = "${event.name}"
+            binding.tvItemDescription.text = event.name
         }
     }
 

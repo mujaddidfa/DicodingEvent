@@ -8,25 +8,38 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.dicoding.dicodingevent.data.response.ListEventsItem
+import com.dicoding.dicodingevent.data.Result
+import com.dicoding.dicodingevent.data.local.room.EventDatabase
+import com.dicoding.dicodingevent.data.remote.response.ListEventsItem
+import com.dicoding.dicodingevent.data.remote.retrofit.ApiConfig
+import com.dicoding.dicodingevent.data.repository.EventRepository
 import com.dicoding.dicodingevent.databinding.FragmentHomeBinding
 import com.dicoding.dicodingevent.ui.DetailActivity
 import com.dicoding.dicodingevent.ui.EventAdapter
+import com.dicoding.dicodingevent.ui.EventViewModel
+import com.dicoding.dicodingevent.ui.ViewModelFactory
+import com.dicoding.dicodingevent.utils.AppExecutors
 
 class HomeFragment : Fragment() {
+
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding ?: throw IllegalStateException("View binding is only valid between onCreateView and onDestroyView")
+
+    private val eventViewModel: EventViewModel by viewModels {
+        ViewModelFactory(
+            EventRepository.getInstance(
+            ApiConfig.getApiService(),
+            EventDatabase.getDatabase(requireContext()).eventDao(),
+            AppExecutors()
+        ))
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
-        val homeViewModel =
-            ViewModelProvider(this)[HomeViewModel::class.java]
-
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
@@ -38,22 +51,67 @@ class HomeFragment : Fragment() {
         val finishedEventsLayoutManager = LinearLayoutManager(requireActivity())
         binding.rvFinishedEvents.layoutManager = finishedEventsLayoutManager
 
-        homeViewModel.upcomingEvents.observe(viewLifecycleOwner) {
-            setUpcomingEventData(it)
+        eventViewModel.getUpcomingEvents().observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is Result.Loading -> showLoadingUpcomingEvents(true)
+                is Result.Success -> {
+                    showLoadingUpcomingEvents(false)
+                    val eventList = result.data.map { eventEntity ->
+                        ListEventsItem(
+                            id = eventEntity.id,
+                            name = eventEntity.name,
+                            summary = eventEntity.summary,
+                            mediaCover = eventEntity.mediaCover,
+                            registrants = eventEntity.registrants,
+                            imageLogo = eventEntity.imageLogo,
+                            link = eventEntity.link,
+                            description = eventEntity.description,
+                            ownerName = eventEntity.ownerName,
+                            cityName = eventEntity.cityName,
+                            quota = eventEntity.quota,
+                            beginTime = eventEntity.beginTime,
+                            endTime = eventEntity.endTime,
+                            category = eventEntity.category
+                        )
+                    }
+                    setUpcomingEventData(eventList)
+                }
+                is Result.Error -> {
+                    showLoadingUpcomingEvents(false)
+                    showError(result.error)
+                }
+            }
         }
 
-        homeViewModel.finishedEvents.observe(viewLifecycleOwner) {
-            setFinishedEventData(it)
-        }
-
-        homeViewModel.isLoading.observe(viewLifecycleOwner) {
-            showLoadingUpcomingEvents(it)
-            showLoadingFinishedEvents(it)
-        }
-
-        homeViewModel.errorMessage.observe(viewLifecycleOwner) { errorMessage ->
-            errorMessage?.let {
-                showError(it)
+        eventViewModel.getFinishedEvents().observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is Result.Loading -> showLoadingFinishedEvents(true)
+                is Result.Success -> {
+                    showLoadingFinishedEvents(false)
+                    val eventList = result.data.map { eventEntity ->
+                        ListEventsItem(
+                            id = eventEntity.id,
+                            name = eventEntity.name,
+                            summary = eventEntity.summary,
+                            mediaCover = eventEntity.mediaCover,
+                            registrants = eventEntity.registrants,
+                            imageLogo = eventEntity.imageLogo,
+                            link = eventEntity.link,
+                            description = eventEntity.description,
+                            ownerName = eventEntity.ownerName,
+                            cityName = eventEntity.cityName,
+                            quota = eventEntity.quota,
+                            beginTime = eventEntity.beginTime,
+                            endTime = eventEntity.endTime,
+                            category = eventEntity.category
+                        )
+                    }
+                    setFinishedEventData(eventList)
+                }
+                is Result.Error -> {
+                    showLoadingFinishedEvents(false)
+                    showError(result.error)
+                }
             }
         }
 

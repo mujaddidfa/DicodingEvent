@@ -8,26 +8,39 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.dicoding.dicodingevent.data.response.ListEventsItem
+import com.dicoding.dicodingevent.data.Result
+import com.dicoding.dicodingevent.data.local.room.EventDatabase
+import com.dicoding.dicodingevent.data.remote.response.ListEventsItem
+import com.dicoding.dicodingevent.data.remote.retrofit.ApiConfig
+import com.dicoding.dicodingevent.data.repository.EventRepository
 import com.dicoding.dicodingevent.databinding.FragmentUpcomingBinding
 import com.dicoding.dicodingevent.ui.DetailActivity
 import com.dicoding.dicodingevent.ui.EventAdapter
+import com.dicoding.dicodingevent.ui.EventViewModel
+import com.dicoding.dicodingevent.ui.ViewModelFactory
+import com.dicoding.dicodingevent.utils.AppExecutors
 
 class UpcomingFragment : Fragment() {
 
     private var _binding: FragmentUpcomingBinding? = null
     private val binding get() = _binding ?: throw IllegalStateException("View binding is only valid between onCreateView and onDestroyView")
 
+    private val eventViewModel: EventViewModel by viewModels {
+        ViewModelFactory(
+            EventRepository.getInstance(
+            ApiConfig.getApiService(),
+            EventDatabase.getDatabase(requireContext()).eventDao(),
+            AppExecutors()
+        ))
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val upcomingViewModel =
-            ViewModelProvider(this)[UpcomingViewModel::class.java]
-
         _binding = FragmentUpcomingBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
@@ -36,17 +49,35 @@ class UpcomingFragment : Fragment() {
         val layoutManager = LinearLayoutManager(requireActivity())
         binding.rvEvent.layoutManager = layoutManager
 
-        upcomingViewModel.upcomingEvents.observe(viewLifecycleOwner) {
-            setEventData(it)
-        }
-
-        upcomingViewModel.isLoading.observe(viewLifecycleOwner) {
-            showLoading(it)
-        }
-
-        upcomingViewModel.errorMessage.observe(viewLifecycleOwner) { errorMessage ->
-            errorMessage?.let {
-                showError(it)
+        eventViewModel.getUpcomingEvents().observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is Result.Loading -> showLoading(true)
+                is Result.Success -> {
+                    showLoading(false)
+                    val eventList = result.data.map { eventEntity ->
+                        ListEventsItem(
+                            id = eventEntity.id,
+                            name = eventEntity.name,
+                            summary = eventEntity.summary,
+                            mediaCover = eventEntity.mediaCover,
+                            registrants = eventEntity.registrants,
+                            imageLogo = eventEntity.imageLogo,
+                            link = eventEntity.link,
+                            description = eventEntity.description,
+                            ownerName = eventEntity.ownerName,
+                            cityName = eventEntity.cityName,
+                            quota = eventEntity.quota,
+                            beginTime = eventEntity.beginTime,
+                            endTime = eventEntity.endTime,
+                            category = eventEntity.category
+                        )
+                    }
+                    setEventData(eventList)
+                }
+                is Result.Error -> {
+                    showLoading(false)
+                    showError(result.error)
+                }
             }
         }
 
@@ -57,7 +88,37 @@ class UpcomingFragment : Fragment() {
                 .setOnEditorActionListener { _, _, _ ->
                     searchBar.setText(searchView.text)
                     searchView.hide()
-                    upcomingViewModel.searchEvents(searchView.text.toString())
+                    eventViewModel.searchUpcomingEvents(searchView.text.toString()).observe(viewLifecycleOwner) { result ->
+                        when (result) {
+                            is Result.Loading -> showLoading(true)
+                            is Result.Success -> {
+                                showLoading(false)
+                                val eventList = result.data.map { eventEntity ->
+                                    ListEventsItem(
+                                        id = eventEntity.id,
+                                        name = eventEntity.name,
+                                        summary = eventEntity.summary,
+                                        mediaCover = eventEntity.mediaCover,
+                                        registrants = eventEntity.registrants,
+                                        imageLogo = eventEntity.imageLogo,
+                                        link = eventEntity.link,
+                                        description = eventEntity.description,
+                                        ownerName = eventEntity.ownerName,
+                                        cityName = eventEntity.cityName,
+                                        quota = eventEntity.quota,
+                                        beginTime = eventEntity.beginTime,
+                                        endTime = eventEntity.endTime,
+                                        category = eventEntity.category
+                                    )
+                                }
+                                setEventData(eventList)
+                            }
+                            is Result.Error -> {
+                                showLoading(false)
+                                showError(result.error)
+                            }
+                        }
+                    }
                     false
                 }
         }

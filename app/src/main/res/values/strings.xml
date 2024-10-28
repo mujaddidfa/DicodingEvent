@@ -15,4 +15,5 @@
     <string name="home">Home</string>
     <string name="media_cover">Media Cover</string>
     <string name="summary">Ringkasan Acara</string>
+    <string name="add_to_favorite">Add to Favorite</string>
 </resources>
