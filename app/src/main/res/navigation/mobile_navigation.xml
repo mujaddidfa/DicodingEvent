@@ -29,4 +29,9 @@
         android:label="@string/favorite"
         tools:layout="@layout/fragment_favorite" />
 
+    <fragment
+        android:id="@+id/navigation_settings"
+        android:name="com.dicoding.dicodingevent.ui.settings.SettingsFragment"
+        android:label="@string/settings"
+        tools:layout="@layout/fragment_settings" />
 </navigation>
