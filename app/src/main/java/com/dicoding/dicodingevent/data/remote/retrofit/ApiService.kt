@@ -14,4 +14,7 @@ interface ApiService {
 
     @GET("events")
     fun searchEvents(@Query("active") active: Int, @Query("q") query: String): Call<EventResponse>
+
+    @GET("events")
+    fun getEventLimited(@Query("active") active: Int, @Query("limit") limit: Int): Call<EventResponse>
 }

@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.dicoding.dicodingevent.data.repository.EventRepository
 import com.dicoding.dicodingevent.di.Injection
 import com.dicoding.dicodingevent.ui.detail.DetailViewModel
-import com.dicoding.dicodingevent.ui.settings.SettingsViewModel
 
 class ViewModelFactory(private val eventRepository: EventRepository) : ViewModelProvider.NewInstanceFactory() {
     @Suppress("UNCHECKED_CAST")
