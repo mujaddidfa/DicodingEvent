@@ -27,6 +27,7 @@ roomRuntime = "2.5.2"
 datastoreCoreAndroid = "1.1.1"
 workRuntime = "2.8.1"
 workRuntimeKtx = "2.9.1"
+roomKtx = "2.5.2"
 
 [libraries]
 android-async-http = { module = "com.loopj.android:android-async-http", version.ref = "androidAsyncHttp" }
@@ -56,6 +57,7 @@ androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
 androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroid" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -68,6 +68,7 @@ dependencies {
     implementation(libs.androidx.work.runtime)
     implementation(libs.android.async.http)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.room.ktx)
     ksp(libs.room.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

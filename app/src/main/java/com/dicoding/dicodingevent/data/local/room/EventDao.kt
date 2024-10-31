@@ -11,7 +11,7 @@ import com.dicoding.dicodingevent.data.local.entity.EventEntity
 @Dao
 interface EventDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertEvents(events: List<EventEntity>)
+    suspend fun insertEvents(events: List<EventEntity>)
 
     @Query("SELECT * FROM event")
     fun getAllEvents(): LiveData<List<EventEntity>>
@@ -29,7 +29,7 @@ interface EventDao {
     fun getEventById(eventId: Int): LiveData<EventEntity>
 
     @Query("UPDATE event SET isFavorite = :isFavorite WHERE id = :eventId")
-    fun setFavoriteEvent(eventId: Int, isFavorite: Boolean)
+    suspend fun setFavoriteEvent(eventId: Int, isFavorite: Boolean)
 
     @Query("SELECT * FROM event WHERE isActive = 1 AND name LIKE '%' || :query || '%'")
     fun searchUpcomingEvents(query: String): LiveData<List<EventEntity>>
@@ -38,8 +38,8 @@ interface EventDao {
     fun searchFinishedEvents(query: String): LiveData<List<EventEntity>>
 
     @Query("SELECT isFavorite FROM event WHERE id = :eventId")
-    fun isFavorite(eventId: Int): Boolean
+    suspend fun isFavorite(eventId: Int): Boolean
 
     @Query("DELETE FROM event")
-    fun deleteAll()
+    suspend fun deleteAll()
 }

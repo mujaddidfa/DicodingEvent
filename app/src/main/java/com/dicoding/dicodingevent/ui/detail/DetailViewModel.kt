@@ -3,8 +3,10 @@ package com.dicoding.dicodingevent.ui.detail
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.dicoding.dicodingevent.data.local.entity.EventEntity
 import com.dicoding.dicodingevent.data.repository.EventRepository
+import kotlinx.coroutines.launch
 
 class DetailViewModel(private val eventRepository: EventRepository) : ViewModel() {
     private val _eventDetail = MutableLiveData<EventEntity>()
@@ -22,6 +24,8 @@ class DetailViewModel(private val eventRepository: EventRepository) : ViewModel(
     }
 
     fun setFavoriteEvent(eventId: Int, isFavorite: Boolean) {
-        eventRepository.setFavoriteEvent(eventId, isFavorite)
+        viewModelScope.launch {
+            eventRepository.setFavoriteEvent(eventId, isFavorite)
+        }
     }
 }

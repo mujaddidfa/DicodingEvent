@@ -7,20 +7,19 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.work.Worker
+import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.dicoding.dicodingevent.BuildConfig
 import com.dicoding.dicodingevent.R
-import com.dicoding.dicodingevent.data.remote.response.EventResponse
 import com.dicoding.dicodingevent.data.remote.retrofit.ApiService
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class MyWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
+class MyWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
     private val apiService: ApiService by lazy {
         Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
@@ -29,47 +28,46 @@ class MyWorker(context: Context, workerParams: WorkerParameters) : Worker(contex
             .create(ApiService::class.java)
     }
 
-    override fun doWork(): Result {
-        val call = apiService.getEventLimited(1, 1)
-        call.enqueue(object : Callback<EventResponse> {
-            override fun onResponse(call: Call<EventResponse>, response: Response<EventResponse>) {
-                if (response.isSuccessful) {
-                    val events = response.body()?.listEvents
-                    events?.forEach { event ->
-                        val title = event.name
-                        val splitTime = event.beginTime.split(" ")
-                        val date = splitTime[0]
-                        val splitDate = date.split("-")
-                        val month = when (splitDate[1]) {
-                            "01" -> "Januari"
-                            "02" -> "Februari"
-                            "03" -> "Maret"
-                            "04" -> "April"
-                            "05" -> "Mei"
-                            "06" -> "Juni"
-                            "07" -> "Juli"
-                            "08" -> "Agustus"
-                            "09" -> "September"
-                            "10" -> "Oktober"
-                            "11" -> "November"
-                            "12" -> "Desember"
-                            else -> ""
-                        }
-                        val dateFormated = "${splitDate[2]} $month ${splitDate[0]}"
-                        val time = splitTime[1]
-
-                        val detail = "$dateFormated pukul $time"
-                        val link = event.link
-                        showNotification(title, detail, link)
+    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+        try {
+            val response = apiService.getEventLimited(1, 1)
+            if (response.isSuccessful) {
+                val events = response.body()?.listEvents
+                events?.forEach { event ->
+                    val title = event.name
+                    val splitTime = event.beginTime.split(" ")
+                    val date = splitTime[0]
+                    val splitDate = date.split("-")
+                    val month = when (splitDate[1]) {
+                        "01" -> "Januari"
+                        "02" -> "Februari"
+                        "03" -> "Maret"
+                        "04" -> "April"
+                        "05" -> "Mei"
+                        "06" -> "Juni"
+                        "07" -> "Juli"
+                        "08" -> "Agustus"
+                        "09" -> "September"
+                        "10" -> "Oktober"
+                        "11" -> "November"
+                        "12" -> "Desember"
+                        else -> ""
                     }
-                }
-            }
+                    val dateFormatted = "${splitDate[2]} $month ${splitDate[0]}"
+                    val time = splitTime[1]
 
-            override fun onFailure(call: Call<EventResponse>, t: Throwable) {
-                t.printStackTrace()
+                    val detail = "$dateFormatted pukul $time"
+                    val link = event.link
+                    showNotification(title, detail, link)
+                }
+            } else {
+                Log.e("MyWorker", "Response not successful: ${response.errorBody()?.string()}")
             }
-        })
-        return Result.success()
+            Result.success()
+        } catch (e: Exception) {
+            Log.e("MyWorker", "Exception: ${e.message}", e)
+            Result.failure()
+        }
     }
 
     private fun showNotification(title: String, detail: String?, link: String) {

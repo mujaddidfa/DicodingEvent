@@ -1,9 +1,12 @@
 package com.dicoding.dicodingevent.data.repository
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.liveData
+import androidx.lifecycle.map
 import com.dicoding.dicodingevent.data.local.entity.EventEntity
 import com.dicoding.dicodingevent.data.local.room.EventDao
 import com.dicoding.dicodingevent.data.remote.retrofit.ApiService
@@ -23,54 +26,42 @@ class EventRepository private constructor(
 ) {
     private val result = MediatorLiveData<Result<List<EventEntity>>>()
 
-    fun getEvents(): LiveData<Result<List<EventEntity>>> {
-        result.value = Result.Loading
-        val client = apiService.getEvents(-1)
-        client.enqueue(object : Callback<EventResponse> {
-            @RequiresApi(Build.VERSION_CODES.O)
-            override fun onResponse(call: Call<EventResponse>, response: Response<EventResponse>) {
-                if (response.isSuccessful) {
-                    val events = response.body()?.listEvents
-                    val eventList = ArrayList<EventEntity>()
-                    appExecutors.diskIO.execute {
-                        events?.forEach { event ->
-                            val isActive = checkEventActive(event.beginTime)
-                            val isFavorite = eventDao.isFavorite(event.id)
-                            val eventEntity = EventEntity(
-                                event.id,
-                                event.name,
-                                event.summary,
-                                event.mediaCover,
-                                event.registrants,
-                                event.imageLogo,
-                                event.link,
-                                event.description,
-                                event.ownerName,
-                                event.cityName,
-                                event.quota,
-                                event.beginTime,
-                                event.endTime,
-                                event.category,
-                                isActive,
-                                isFavorite
-                            )
-                            eventList.add(eventEntity)
-                        }
-                        eventDao.deleteAll()
-                        eventDao.insertEvents(eventList)
-                    }
-                }
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getEvents(): LiveData<Result<List<EventEntity>>> = liveData {
+        emit(Result.Loading)
+        try {
+            val response = apiService.getEvents(-1)
+            val events = response.listEvents
+            val eventList = events.map { event ->
+                val isActive = checkEventActive(event.beginTime)
+                val isFavorite = eventDao.isFavorite(event.id)
+                EventEntity(
+                    event.id,
+                    event.name,
+                    event.summary,
+                    event.mediaCover,
+                    event.registrants,
+                    event.imageLogo,
+                    event.link,
+                    event.description,
+                    event.ownerName,
+                    event.cityName,
+                    event.quota,
+                    event.beginTime,
+                    event.endTime,
+                    event.category,
+                    isActive,
+                    isFavorite
+                )
             }
-
-            override fun onFailure(call: Call<EventResponse>, t: Throwable) {
-                result.value = Result.Error(t.message.toString())
-            }
-        })
-        val localData = eventDao.getAllEvents()
-        result.addSource(localData) { newData: List<EventEntity> ->
-            result.value = Result.Success(newData)
+            eventDao.deleteAll()
+            eventDao.insertEvents(eventList)
+        } catch (e: Exception) {
+            Log.d("EventRepository", e.message.toString())
+            emit(Result.Error(e.message.toString()))
         }
-        return result
+        val localData: LiveData<Result<List<EventEntity>>> = eventDao.getAllEvents().map { Result.Success(it) }
+        emitSource(localData)
     }
 
     fun getUpcomingEvents(): LiveData<Result<List<EventEntity>>> {
@@ -127,10 +118,8 @@ class EventRepository private constructor(
         return eventDao.getEventById(eventId)
     }
 
-    fun setFavoriteEvent(eventId: Int, isFavorite: Boolean) {
-        appExecutors.diskIO.execute {
-            eventDao.setFavoriteEvent(eventId, isFavorite)
-        }
+    suspend fun setFavoriteEvent(eventId: Int, isFavorite: Boolean) {
+        eventDao.setFavoriteEvent(eventId, isFavorite)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
