@@ -2,6 +2,7 @@ package com.dicoding.dicodingevent.ui
 
 import android.app.Application
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatDelegate
 import com.dicoding.dicodingevent.data.local.room.EventDatabase
@@ -21,7 +22,19 @@ class MyApplication : Application() {
         val eventDao = EventDatabase.getDatabase(this).eventDao()
         val apiService = ApiConfig.getApiService()
         val eventRepository = EventRepository.getInstance(apiService, eventDao)
-        eventRepository.getEvents()
+        Log.d("MyApplication", "Calling getEvents")
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val eventsLiveData = eventRepository.getEvents()
+                withContext(Dispatchers.Main) {
+                    eventsLiveData.observeForever {
+                        Log.d("MyApplication", "getEvents result: $it")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("MyApplication", "Error calling getEvents", e)
+            }
+        }
         val pref = SettingPreference.getInstance(dataStore)
         CoroutineScope(Dispatchers.IO).launch {
             pref.getThemeSetting().collect { isDarkModeActive ->
