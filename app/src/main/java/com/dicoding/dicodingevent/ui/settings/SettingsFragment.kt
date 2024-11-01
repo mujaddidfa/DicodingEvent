@@ -75,7 +75,7 @@ class SettingsFragment : Fragment() {
             if (isNotificationActive) {
                 workManager.enqueueUniquePeriodicWork(
                     "MyWorker",
-                    ExistingPeriodicWorkPolicy.REPLACE,
+                    ExistingPeriodicWorkPolicy.UPDATE,
                     periodicWorkRequest
                 )
                 switchNotification.isChecked = true
