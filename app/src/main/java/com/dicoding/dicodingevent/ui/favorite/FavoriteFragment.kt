@@ -10,7 +10,6 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.dicoding.dicodingevent.R
 import com.dicoding.dicodingevent.data.Result
 import com.dicoding.dicodingevent.data.local.room.EventDatabase
 import com.dicoding.dicodingevent.data.remote.response.ListEventsItem
@@ -21,7 +20,6 @@ import com.dicoding.dicodingevent.ui.EventAdapter
 import com.dicoding.dicodingevent.ui.EventViewModel
 import com.dicoding.dicodingevent.ui.ViewModelFactory
 import com.dicoding.dicodingevent.ui.detail.DetailActivity
-import com.dicoding.dicodingevent.utils.AppExecutors
 
 class FavoriteFragment : Fragment() {
 
@@ -32,8 +30,7 @@ class FavoriteFragment : Fragment() {
         ViewModelFactory(
             EventRepository.getInstance(
             ApiConfig.getApiService(),
-            EventDatabase.getDatabase(requireContext()).eventDao(),
-            AppExecutors()
+            EventDatabase.getDatabase(requireContext()).eventDao()
         ))
     }
 

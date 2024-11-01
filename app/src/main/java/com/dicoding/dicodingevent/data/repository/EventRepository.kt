@@ -10,22 +10,14 @@ import androidx.lifecycle.map
 import com.dicoding.dicodingevent.data.local.entity.EventEntity
 import com.dicoding.dicodingevent.data.local.room.EventDao
 import com.dicoding.dicodingevent.data.remote.retrofit.ApiService
-import com.dicoding.dicodingevent.utils.AppExecutors
 import com.dicoding.dicodingevent.data.Result
-import com.dicoding.dicodingevent.data.remote.response.EventResponse
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class EventRepository private constructor(
     private val apiService: ApiService,
     private val eventDao: EventDao,
-    private val appExecutors: AppExecutors
 ) {
-    private val result = MediatorLiveData<Result<List<EventEntity>>>()
-
     @RequiresApi(Build.VERSION_CODES.O)
     fun getEvents(): LiveData<Result<List<EventEntity>>> = liveData {
         emit(Result.Loading)
@@ -135,10 +127,9 @@ class EventRepository private constructor(
         fun getInstance(
             apiService: ApiService,
             eventDao: EventDao,
-            appExecutors: AppExecutors
         ) : EventRepository =
             instance ?: synchronized(this) {
-                instance ?: EventRepository(apiService, eventDao, appExecutors)
+                instance ?: EventRepository(apiService, eventDao)
             }.also { instance = it }
     }
 }

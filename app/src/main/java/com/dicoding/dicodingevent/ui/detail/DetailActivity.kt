@@ -16,7 +16,6 @@ import com.dicoding.dicodingevent.data.remote.retrofit.ApiConfig
 import com.dicoding.dicodingevent.data.repository.EventRepository
 import com.dicoding.dicodingevent.databinding.ActivityDetailBinding
 import com.dicoding.dicodingevent.ui.ViewModelFactory
-import com.dicoding.dicodingevent.utils.AppExecutors
 
 class DetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDetailBinding
@@ -24,8 +23,7 @@ class DetailActivity : AppCompatActivity() {
         ViewModelFactory(
             EventRepository.getInstance(
             ApiConfig.getApiService(),
-            EventDatabase.getDatabase(this).eventDao(),
-            AppExecutors()
+            EventDatabase.getDatabase(this).eventDao()
         ))
     }
 

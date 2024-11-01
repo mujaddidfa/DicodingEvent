@@ -20,7 +20,6 @@ import com.dicoding.dicodingevent.ui.detail.DetailActivity
 import com.dicoding.dicodingevent.ui.EventAdapter
 import com.dicoding.dicodingevent.ui.EventViewModel
 import com.dicoding.dicodingevent.ui.ViewModelFactory
-import com.dicoding.dicodingevent.utils.AppExecutors
 
 class HomeFragment : Fragment() {
 
@@ -31,8 +30,7 @@ class HomeFragment : Fragment() {
         ViewModelFactory(
             EventRepository.getInstance(
             ApiConfig.getApiService(),
-            EventDatabase.getDatabase(requireContext()).eventDao(),
-            AppExecutors()
+            EventDatabase.getDatabase(requireContext()).eventDao()
         ))
     }
 
